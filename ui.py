@@ -26,13 +26,14 @@ class ImageCropper(QMainWindow):
         self.centralWidget = QWidget()
         self.setCentralWidget(self.centralWidget)
         self.scene = QGraphicsScene()
-        self.view = customQGraphicsView(self.scene)
-        
+        self.view = customQGraphicsView()
+        self.view.setScene(self.scene)
+        self.transform = self.view.transform()
         self.layout = QHBoxLayout()
         self.splitter = QSplitter(Qt.Vertical)
         self.splitter.addWidget(self.view)
         self.view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.layout.addWidget(self.splitter, stretch = 6)
+        self.layout.addWidget(self.splitter, stretch = 4)
         self.editToolBarV = QToolBar(self)
         self.editToolBarH = QToolBar(self)
         self.addToolBar(Qt.LeftToolBarArea,self.editToolBarV)
@@ -125,39 +126,39 @@ class ImageCropper(QMainWindow):
             width.setText('Width:')
             height = QLabel()
             height.setText('Height:')
-            self.e1 = QLineEdit()
-            validator = QIntValidator(100, 2000)
-            self.e1.setValidator(validator)
-            self.e1.setAlignment(Qt.AlignHCenter)
-            self.e1.setMaxLength(4)
-            self.e1.setFixedSize(100, 25)
-            self.e2 = QLineEdit()
-            validator = QIntValidator(100, 2000)
-            self.e2.setValidator(validator)
-            self.e2.setAlignment(Qt.AlignHCenter)
-            self.e2.setMaxLength(4)
-            self.e2.setFixedSize(100, 25)
+            self.spinBoxW = QSpinBox()
+            self.spinBoxW.setMinimum(100) # Đặt giới hạn tối thiểu là 0
+            self.spinBoxW.setMaximum(2100) # Đặt giới hạn tối đa là 100
+            self.spinBoxW.setSingleStep(1) # Đặt bước tăng/giảm mặc định là 1
+            self.spinBoxW.setValue(100)
+            
+            self.spinBoxH = QSpinBox()
+            self.spinBoxH.setMinimum(100) # Đặt giới hạn tối thiểu là 0
+            self.spinBoxH.setMaximum(2100) # Đặt giới hạn tối đa là 100
+            self.spinBoxH.setSingleStep(1) # Đặt bước tăng/giảm mặc định là 1
+            self.spinBoxH.setValue(100)
+            # self.e2.setFixedSize(100, 25)
             
             button_action = QAction( self)
             button_action.setShortcut(QKeySequence(Qt.Key_Enter))
             button_action.triggered.connect(self.buttonClickToResize)
-            self.e1.returnPressed.connect(button_action.trigger)
-            self.e2.returnPressed.connect(button_action.trigger)
+            self.spinBoxW.editingFinished.connect(button_action.trigger)
+            self.spinBoxH.editingFinished.connect(button_action.trigger)
 
             toolBarH = QHBoxLayout()
             toolBarH.addWidget(width)
-            toolBarH.addWidget(self.e1)
+            toolBarH.addWidget(self.spinBoxW)
             toolBarH.addWidget(height)
-            toolBarH.addWidget(self.e2)
+            toolBarH.addWidget(self.spinBoxH)
             window.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
             window.setLayout(toolBarH)
             self.editToolBarH.addWidget(window)
             self.editToolBarH.addAction(button_action)
     
     def buttonClickToResize(self):
-        if self.e1.text() != '' and self.e2.text() != '' and 2000 >= int(self.e1.text()) >= 200 and 2000>= int(self.e2.text()) >= 200:
-            width = int(self.e1.text())
-            height = int(self.e2.text())
+        if self.spinBoxW.value() is not None and self.spinBoxH.value() is not None :
+            width = self.spinBoxW.value()
+            height = self.spinBoxH.value() 
             self.pixmap = self.pixmap.scaled(QSize(width,height), Qt.IgnoreAspectRatio,Qt.SmoothTransformation )
             self.scene.clear()  # Clear the scene
             self.scene.setSceneRect(0, 0, self.pixmap.width(), self.pixmap.height())
@@ -301,12 +302,81 @@ class ImageCropper(QMainWindow):
         self.scene.addPixmap(self.pixmap)
         self.scene.update()
 
-
-    def text(parent):
+    def text(self):
         
-        # self.scale *= 1.15
-        # self.resize_image()
-        pass
+        
+        # self.view.mouseReleaseEvent.connect(self.ab)
+           
+        if self.image is not None:
+            self.view.activate = True
+            self.view.textFlag = True
+                
+            self.text = self.view.text
+            self.proxy = QGraphicsProxyWidget()
+            self.viewChild = QGraphicsView()
+            self.viewChild.setScene(self.view.scene)
+
+            # Create the QGraphicsProxyWidget and set the QGraphicsView as its widget
+            # self.proxy = QGraphicsProxyWidget()
+            # self.proxy.setWidget(self.viewChild)
+            self.scene.addItem(self.viewChild)
+            self.editToolBarH.clear()
+            fontbox = QFontComboBox(self)
+            fontbox.currentFontChanged.connect(lambda font: self.text.setCurrentFont(font))
+            fontSize = QSpinBox(self)
+            fontSize.setSuffix(" pt")
+            fontSize.valueChanged.connect(lambda size: self.text.setFontPointSize(size))
+            fontSize.setValue(14)
+    
+            fontColor = QAction(QIcon("icons/font-color.png"),"Change font color",self)
+            fontColor.triggered.connect(self.fontColorChanged)
+
+            backColor = QAction(QIcon("icons/highlight.png"),"Change background color",self)
+            backColor.triggered.connect(self.highlight)
+
+            boldAction = QAction(QIcon("icons/bold.png"),"Bold",self)
+            boldAction.triggered.connect(self.bold)
+
+            italicAction = QAction(QIcon("icons/italic.png"),"Italic",self)
+            italicAction.triggered.connect(self.italic)
+
+            underlAction = QAction(QIcon("icons/underline.png"),"Underline",self)
+            underlAction.triggered.connect(self.underline)
+
+            strikeAction = QAction(QIcon("icons/strike.png"),"Strike-out",self)
+            strikeAction.triggered.connect(self.strike)
+
+            alignLeft = QAction(QIcon("icons/align-left.png"),"Align left",self)
+            alignLeft.triggered.connect(self.alignLeft)
+
+            alignCenter = QAction(QIcon("icons/align-center.png"),"Align center",self)
+            alignCenter.triggered.connect(self.alignCenter)
+
+            alignRight = QAction(QIcon("icons/align-right.png"),"Align right",self)
+            alignRight.triggered.connect(self.alignRight)
+
+            alignJustify = QAction(QIcon("icons/align-justify.png"),"Align justify",self)
+            alignJustify.triggered.connect(self.alignJustify)
+            self.editToolBarH.addWidget(fontbox)
+            self.editToolBarH.addWidget(fontSize)
+            self.editToolBarH.addSeparator()
+            self.editToolBarH.addAction(fontColor)
+            self.editToolBarH.addAction(backColor)
+
+            self.editToolBarH.addSeparator()
+
+            self.editToolBarH.addAction(boldAction)
+            self.editToolBarH.addAction(italicAction)
+            self.editToolBarH.addAction(underlAction)
+            self.editToolBarH.addAction(strikeAction)
+
+            self.editToolBarH.addSeparator()
+            self.editToolBarH.addAction(alignLeft)
+            self.editToolBarH.addAction(alignCenter)
+            self.editToolBarH.addAction(alignRight)
+            self.editToolBarH.addAction(alignJustify)
+
+            
 
     def updateView(self):
         matrix = QTransform().scale(self.view.viewport().width() / self.scene.width(), self.view.viewport().height() / self.scene.height())
@@ -320,6 +390,45 @@ class ImageCropper(QMainWindow):
         image_data = cv2.cvtColor(image_data, cv2.COLOR_RGB2BGR)
         # image_data = image_data.reshape(pixmap.height(), pixmap.width(), 3)
         return image_data
+
+    def fontColorChanged(self):
+        color = QColorDialog.getColor()
+        self.text.setTextColor(color)
+        
+    def highlight(self):
+       color = QColorDialog.getColor()
+       self.text.setTextBackgroundColor(color)
+        
+    def bold(self):
+        if self.text.fontWeight() == QFont.Bold:
+            self.text.setFontWeight(QFont.Normal)
+        else:
+            self.text.setFontWeight(QFont.Bold)
+    
+    def italic(self):
+        state = self.text.fontItalic()
+        self.text.setFontItalic(not state)
+
+    def underline(self):
+        state = self.text.fontUnderline()
+        self.text.setFontUnderline(not state)
+
+    def strike(self):
+        fmt = self.text.currentCharFormat()
+        fmt.setFontStrikeOut(not fmt.fontStrikeOut())
+        self.text.setCurrentCharFormat(fmt)
+        
+    def alignLeft(self):
+        self.text.setAlignment(Qt.AlignLeft)
+
+    def alignRight(self):
+        self.text.setAlignment(Qt.AlignRight)
+
+    def alignCenter(self):
+        self.text.setAlignment(Qt.AlignCenter)
+    
+    def alignJustify(self):
+        self.text.setAlignment(Qt.AlignJustify)
 
 
 

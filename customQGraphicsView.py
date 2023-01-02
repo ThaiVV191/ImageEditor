@@ -6,14 +6,23 @@ from PyQt5.QtWidgets import *
 
 
 class customQGraphicsView(QGraphicsView):
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self):
+        super().__init__()
         self.is_cropping = False
         self.crop_rect = None
         self.mouse_inside = False
         self.crop_start = None
+        self.scene = QGraphicsScene()
         self.crop_end = None
         self.activate = False
+        self.textFlag = False
+        self.text = QTextEdit() 
+        
+        # self.button = pyqtSignal( QPoint,QPoint )
+
+
+        # self.pointS = pointS
+        # self.pointE = pointE
     
     def enterEvent(self, event):
         self.mouse_inside = True
@@ -26,8 +35,6 @@ class customQGraphicsView(QGraphicsView):
             self.is_cropping = True
             self.crop_start = event.pos()
             self.crop_end = event.pos()
-
-            # super().mousePressEvent(event)
         else:
             event.ignore()
         
@@ -36,43 +43,25 @@ class customQGraphicsView(QGraphicsView):
         if self.activate and  self.mouse_inside and self.is_cropping:
             self.crop_end = event.pos()
             self.updateCropRect()
-            # super().mouseMoveEvent(event)
         else:
             event.ignore()
         
     def mouseReleaseEvent(self, event):
         if self.activate and  self.mouse_inside and event.button() == Qt.LeftButton:
             self.is_cropping = False
-            e = self.crop_end
-            # print(self.crop_end)
-            # print(self.image.width(), self.image.height() )
-            # x,y, x1, y1 = self.mapToScene(self.crop_start).x(), self.mapToScene(self.crop_start).y(), self.mapToScene(self.crop_end).x(), self.mapToScene(self.crop_end).y()
-            # x = 0 if x < 0 else x
-            # y = 0 if y < 0 else y
-            # x1 = self.image.width() if x1 > self.image.width() else x1
-            # y1  = self.image.height() if y1 > self.image.height() else y1
-            # # print(x,x1)
-            # # self.crop_rect = QRectF()
-            # self.crop_rect = QRectF(x,y, x1 - x, y1 - y)
-            # print(self.crop_rect)
-            # print('image', self.image.size())
-            # self.image = self.image.copy(self.crop_rect.toRect())
-
-            # self.pixmap = QPixmap.fromImage(self.image)
-            # self.scene.clear()  # Clear the scene
-            # self.scene.setSceneRect(0, 0, self.pixmap.width(), self.pixmap.height())
-            # self.scene.addPixmap(self.pixmap)
-            # self.scene.update()
-            # self.crop_rect = None
-            # return {"button": e}
+            if self.textFlag:
+                            
+                x,y, x1, y1 = self.mapToScene(self.crop_start).x(), self.mapToScene(self.crop_start).y(), self.mapToScene(self.crop_end).x(), self.mapToScene(self.crop_end).y()
+                self.text.setGeometry(x, y, x1-x, y1 - y)
+                self.scene.addWidget(self.text)
+            
         
     def getResult(self):
         return self.crop_start, self.crop_end
-
-        
-        
+     
     def updateCropRect(self):
         if self.activate and self.mouse_inside:
+            # if self.crop_start.x() < self
             self.crop_rect = QRectF(self.crop_start, self.crop_end)
             self.viewport().update()
         
@@ -107,24 +96,7 @@ class MainWindow(QMainWindow):
         toolButton.clicked.connect(self.open)  
         self.editToolBarV.addWidget(toolButton)
         self.showMaximized()
-        # self.view.mouseReleaseEvent
 
-    # def _createToolBar(self, name, log, shortCut):
-    #     window = QWidget()
-    #     button = QVBoxLayout()
-    #     toolButton = QToolButton(self)
-    #     toolButton.setAutoRaise(True)
-    #     toolButton.clicked.connect(log)       
-    #     toolButton.setShortcut(QKeySequence(shortCut))
-    #     toolButton.setIcon(QIcon(name))
-    #     toolButton.setIconSize(QSize(30, 30))
-    #     toolButton.setCheckable(True)
-    #     button.addWidget(toolButton)
-    #     spacer = QSpacerItem(10, 10, QSizePolicy.Fixed, QSizePolicy.Fixed)
-    #     button.addItem(spacer)
-    #     window.setLayout(button)
-    #     self.editToolBarV.addWidget(window)
-    #     return toolButton
 
     def log(self):
         

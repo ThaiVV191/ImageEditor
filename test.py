@@ -1,29 +1,38 @@
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QImage, QPixmap, QPainter
-from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QApplication, QMainWindow
 import sys
+from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QTextEdit
+from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtCore import Qt
+
+class MouseTrackerView(QGraphicsView):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setMouseTracking(True)
+        self.textedit = None
+
+    def mouseMoveEvent(self, event):
+        if self.textedit:
+            self.textedit.move(event.pos())
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.textedit = QTextEdit()
+            self.scene().addWidget(self.textedit)
+            self.textedit.move(event.pos())
+            self.textedit.show()
+
 app = QApplication(sys.argv)
+
 # Load the image
 image = QImage("samoyed_puppy_dog_pictures.jpg")
 
-# Create a QGraphicsView widget and set the image as the background
-view = QGraphicsView()
-view.setScene(QGraphicsScene(view))
-view.scene().addPixmap(QPixmap.fromImage(image))
-view.setRenderHint(QPainter.SmoothPixmapTransform)
-# Set the transformation anchor to the center of the view, so that the image is zoomed in from the center
-view.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
+# Create the QGraphicsScene and add the image to it
+scene = QGraphicsScene()
+scene.addPixmap(QPixmap.fromImage(image))
 
-# Set the zoom level to 2 (i.e., the image will be scaled up by a factor of 2)
-view.scale(2, 2)
+# Create the QGraphicsView and set the scene
+view = MouseTrackerView()
+view.setScene(scene)
 
-# Show the view
 view.show()
 
-# Run the QApplication event loop
-
-
-
-
-# Run the QApplication event loop
 sys.exit(app.exec_())
