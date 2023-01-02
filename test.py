@@ -1,38 +1,26 @@
-import sys
-from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QTextEdit
-from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap, QPainter, QFont
+from PyQt5.QtWidgets import QApplication, QLabel
 
-class MouseTrackerView(QGraphicsView):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setMouseTracking(True)
-        self.textedit = None
+app = QApplication([])
 
-    def mouseMoveEvent(self, event):
-        if self.textedit:
-            self.textedit.move(event.pos())
+# Tạo đối tượng QPixmap để lưu trữ hình ảnh
+pixmap = QPixmap("samoyed_puppy_dog_pictures.jpg")
 
-    def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.textedit = QTextEdit()
-            self.scene().addWidget(self.textedit)
-            self.textedit.move(event.pos())
-            self.textedit.show()
+# Tạo đối tượng QPainter và gọi hàm begin() trên đối tượng QPixmap
+painter = QPainter(pixmap)
+painter.begin(pixmap)
 
-app = QApplication(sys.argv)
+# Chèn chữ lên hình ảnh bằng cách gọi hàm drawText() trên đối tượng QPainter
+font = QFont("Arial", 16)
+painter.setFont(font)
+painter.drawText(10, 50, "Hello \n World!")
 
-# Load the image
-image = QImage("samoyed_puppy_dog_pictures.jpg")
+# Gọi hàm end() để kết thúc quá trình vẽ
+painter.end()
 
-# Create the QGraphicsScene and add the image to it
-scene = QGraphicsScene()
-scene.addPixmap(QPixmap.fromImage(image))
+# Hiển thị hình ảnh với chữ đã được chèn vào
+label = QLabel()
+label.setPixmap(pixmap)
+label.show()
 
-# Create the QGraphicsView and set the scene
-view = MouseTrackerView()
-view.setScene(scene)
-
-view.show()
-
-sys.exit(app.exec_())
+app.exec_()

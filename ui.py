@@ -89,6 +89,7 @@ class ImageCropper(QMainWindow):
     def open(self):
         self.editToolBarH.clear()
         self.view.activate = False
+
         file_name, _ = QFileDialog.getOpenFileName(
             self, "Open file", ".", "Image Files (*.png *.jpg *.bmp)"
         )
@@ -104,12 +105,14 @@ class ImageCropper(QMainWindow):
     def zoomIn(self):
         self.editToolBarH.clear()
         self.view.activate = False
+        self.view.crop_rect = None
         self.scale = 1.05
         self.actionZoom()
 
     def zoomOut(self):
         self.editToolBarH.clear()
         self.view.activate = False
+        self.view.crop_rect = None
         self.scale *= 0.95
         self.actionZoom()
         
@@ -121,6 +124,7 @@ class ImageCropper(QMainWindow):
         if self.image is not None:
             self.editToolBarH.clear()
             self.view.activate = False
+            self.view.crop_rect = None
             window = QWidget()
             width = QLabel()
             width.setText('Width:')
@@ -140,10 +144,10 @@ class ImageCropper(QMainWindow):
             # self.e2.setFixedSize(100, 25)
             
             button_action = QAction( self)
-            button_action.setShortcut(QKeySequence(Qt.Key_Enter))
+            button_action.setIcon(QIcon('icons/check.png'))
             button_action.triggered.connect(self.buttonClickToResize)
-            self.spinBoxW.editingFinished.connect(button_action.trigger)
-            self.spinBoxH.editingFinished.connect(button_action.trigger)
+            # self.spinBoxW.editingFinished.connect(button_action.trigger)
+            # self.spinBoxH.editingFinished.connect(button_action.trigger)
 
             toolBarH = QHBoxLayout()
             toolBarH.addWidget(width)
@@ -219,6 +223,7 @@ class ImageCropper(QMainWindow):
         if self.image is not None:
             self.editToolBarH.clear()
             self.view.activate = False
+            self.view.crop_rect = None
             self.pixmap = self.pixmap.transformed(QTransform().scale(-1, 1))
             self.pixmap = self.pixmap.copy()
             self.scene.setSceneRect(0, 0, self.pixmap.width(), self.pixmap.height())
@@ -231,6 +236,7 @@ class ImageCropper(QMainWindow):
         if self.image is not None:
             self.editToolBarH.clear()
             self.view.activate = False
+            self.view.crop_rect = None
             self.pixmap = self.pixmap.transformed(QTransform().scale(1, -1))
             self.pixmap = self.pixmap.copy()
             self.scene.setSceneRect(0, 0, self.pixmap.width(), self.pixmap.height())
@@ -243,6 +249,7 @@ class ImageCropper(QMainWindow):
             self.pixmap_ = self.pixmap.copy()
             self.editToolBarH.clear()
             self.view.activate = False
+            self.view.crop_rect = None
             self.slider = QSlider(Qt.Horizontal, self)
             self.slider.setMinimum(0)
             self.slider.setMaximum(360)
@@ -303,24 +310,14 @@ class ImageCropper(QMainWindow):
         self.scene.update()
 
     def text(self):
-        
-        
-        # self.view.mouseReleaseEvent.connect(self.ab)
-           
         if self.image is not None:
             self.view.activate = True
             self.view.textFlag = True
-                
-            self.text = self.view.text
-            self.proxy = QGraphicsProxyWidget()
-            self.viewChild = QGraphicsView()
-            self.viewChild.setScene(self.view.scene)
-
-            # Create the QGraphicsProxyWidget and set the QGraphicsView as its widget
-            # self.proxy = QGraphicsProxyWidget()
-            # self.proxy.setWidget(self.viewChild)
-            self.scene.addItem(self.viewChild)
+            self.text = QTextEdit()
+            # self.text.setMinimumSize(200,100)
             self.editToolBarH.clear()
+            self.painter = QPainter(self.pixmap)
+            self.painter.begin(self.pixmap)           
             fontbox = QFontComboBox(self)
             fontbox.currentFontChanged.connect(lambda font: self.text.setCurrentFont(font))
             fontSize = QSpinBox(self)
@@ -375,7 +372,103 @@ class ImageCropper(QMainWindow):
             self.editToolBarH.addAction(alignCenter)
             self.editToolBarH.addAction(alignRight)
             self.editToolBarH.addAction(alignJustify)
+            button_action_text = QAction(self)
+            button_action_text.setIcon(QIcon('icons/check.png'))
+            button_action_text.triggered.connect(self.buttonClickToSetText)
+            self.button_action_text_Pm = QAction(self)
+            self.editToolBarH.addAction(button_action_text)
 
+    def buttonClickToSetText(self):
+        self.crop_start, self.crop_end = self.view.getResult()
+        print(self.crop_start, self.crop_end)
+        # self.text = QTextEdit()
+        # if not self.text.isVisible():
+        #     print(1)
+        #     self.text = QTextEdit()
+        try:
+            self.text.deleteLater()
+            self.button_action_text_Pm.deleteLater()
+        except:
+            # print(1)
+            pass
+            # self.text = QTextEdit()
+            # self.text.setFixedSize(self.x1 - self.x, self.y1 - self.y)
+            # self.text.move(self.x,self.y)
+            # self.scene.addWidget(self.text)
+        if self.crop_start is not None and self.crop_end is not None:
+            # print(2)
+            x,y, x1, y1 = self.view.mapToScene(self.crop_start).x(), self.view.mapToScene(self.crop_start).y(), self.view.mapToScene(self.crop_end).x(), self.view.mapToScene(self.crop_end).y()
+            x = 0 if x < 0 else x
+            y = 0 if y < 0 else y
+            x1 = self.pixmap.width() if x1 > self.pixmap.width() else x1
+            y1  = self.pixmap.height() if y1 > self.pixmap.height() else y1
+            self.x = x
+            self.y = y
+            self.x1 = x1
+            self.y1 = y1
+            # crop_rect = QRectF(x,y, x1 - x, y1 - y)
+            self.text = QTextEdit()
+            self.text.setFixedSize(self.x1 - self.x, self.y1 - self.y)
+            self.text.move(self.x,self.y)
+            
+            self.view.crop_rect = None
+            self.scene.addWidget(self.text)
+            self.button_action_text_Pm = QAction("OK",self)
+            self.button_action_text_Pm.triggered.connect(self.buttonClickToSetTextPixmap)
+            self.editToolBarH.addAction(self.button_action_text_Pm)
+            
+        # else:
+        #     self.text = QTextEdit()
+        #     self.text.setMinimumSize(200,100)
+        #     self.button_action_text_Pm = QAction("OK",self)
+        #     self.button_action_text_Pm.triggered.connect(self.buttonClickToSetTextPixmap)
+        #     self.editToolBarH.addAction(self.button_action_text_Pm)
+        #     self.scene.addWidget(self.text)
+        
+
+    def buttonClickToSetTextPixmap(self):
+        self.text.deleteLater()
+        self.button_action_text_Pm.deleteLater()
+        if self.text.isVisible():
+            self.crop_start = None
+            self.crop_end = None
+        # self.text.setVisible(False)
+            text = self.text.toPlainText().split("\n")
+            self.pen = QPen(self.text.currentCharFormat().foreground().color())
+            cursor = self.text.textCursor()
+            cursor.movePosition(QTextCursor.Start)
+            cursor.movePosition(QTextCursor.End, QTextCursor.KeepAnchor)
+            format = cursor.charFormat()
+            self.font = self.text.currentFont()
+            if format.fontItalic():
+                self.font.setItalic(True)
+            if format.fontUnderline():
+                self.font.setUnderline(True)
+            if format.fontStrikeOut():
+                self.font.setStrikeOut(True)
+            self.painter.setFont(self.font)
+            self.painter.setPen(self.pen)
+            x = self.x
+            y = self.y
+            try:
+                for i in range(len(text)):
+                    x = self.x + i * self.font.pointSize() + 10
+                    y = self.y + i * self.font.pointSize()
+                    self.painter.drawText(x, y, text[i])
+            except:
+                self.x = 10
+                self.y = 10
+                for i in range(len(text)):
+                    x = self.x + i * self.font.pointSize() + 10
+                    y = self.y + i * self.font.pointSize()
+                    self.painter.drawText(x, y, text[i])
+            self.scene.clear()
+            self.scene.addPixmap(self.pixmap)
+            self.scene.update()
+            
+
+
+    
             
 
     def updateView(self):
@@ -409,9 +502,11 @@ class ImageCropper(QMainWindow):
         state = self.text.fontItalic()
         self.text.setFontItalic(not state)
 
+
     def underline(self):
         state = self.text.fontUnderline()
         self.text.setFontUnderline(not state)
+
 
     def strike(self):
         fmt = self.text.currentCharFormat()

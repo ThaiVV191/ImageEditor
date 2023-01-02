@@ -15,14 +15,6 @@ class customQGraphicsView(QGraphicsView):
         self.scene = QGraphicsScene()
         self.crop_end = None
         self.activate = False
-        self.textFlag = False
-        self.text = QTextEdit() 
-        
-        # self.button = pyqtSignal( QPoint,QPoint )
-
-
-        # self.pointS = pointS
-        # self.pointE = pointE
     
     def enterEvent(self, event):
         self.mouse_inside = True
@@ -49,19 +41,17 @@ class customQGraphicsView(QGraphicsView):
     def mouseReleaseEvent(self, event):
         if self.activate and  self.mouse_inside and event.button() == Qt.LeftButton:
             self.is_cropping = False
-            if self.textFlag:
-                            
-                x,y, x1, y1 = self.mapToScene(self.crop_start).x(), self.mapToScene(self.crop_start).y(), self.mapToScene(self.crop_end).x(), self.mapToScene(self.crop_end).y()
-                self.text.setGeometry(x, y, x1-x, y1 - y)
-                self.scene.addWidget(self.text)
+            
             
         
     def getResult(self):
-        return self.crop_start, self.crop_end
+        if self.crop_end == self.crop_start or abs(self.crop_end.x() - self.crop_start.x()) < 20 or abs(self.crop_end.y() - self.crop_start.y()) < 20 :
+            return None, None
+        else:
+            return self.crop_start, self.crop_end
      
     def updateCropRect(self):
         if self.activate and self.mouse_inside:
-            # if self.crop_start.x() < self
             self.crop_rect = QRectF(self.crop_start, self.crop_end)
             self.viewport().update()
         
@@ -82,13 +72,11 @@ class MainWindow(QMainWindow):
         self.view = customQGraphicsView(self)
         self.image = QImage("samoyed_puppy_dog_pictures.jpg")  
         self.scene = QGraphicsScene(self)
-        self.pixmap = QPixmap.fromImage(self.image)
-        
+        self.pixmap = QPixmap.fromImage(self.image)       
         self.scene.setSceneRect(0, 0, self.pixmap.width(), self.pixmap.height())
         self.scene.addPixmap(self.pixmap)
         self.view.setScene(self.scene)
-        self.setCentralWidget(self.view)
-        
+        self.setCentralWidget(self.view)      
         self.editToolBarV = QToolBar(self)
         toolButton = QToolButton(self)
         toolButton.setIcon(QIcon('icons/crop.png'))
@@ -98,11 +86,8 @@ class MainWindow(QMainWindow):
         self.showMaximized()
 
 
-    def log(self):
-        
+    def log(self):       
         print(self.view.size())
-        # print(self.view.)
-
     def open(self):
         print(self.view.getResult())
 
