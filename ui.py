@@ -17,6 +17,7 @@ class ImageCropper(QMainWindow):
         self.scale = 1
         self.image = None
         self.initUI()
+        self.tool()
         self.createToolBarV()
 
 
@@ -39,10 +40,77 @@ class ImageCropper(QMainWindow):
         self.addToolBar(Qt.LeftToolBarArea,self.editToolBarV)
         self.addToolBar(Qt.TopToolBarArea,self.editToolBarH)
         self.editToolBarH.setFixedHeight(50)
-        self.note = QListWidget()
-        self.layout.addWidget(self.note, stretch = 1)
+        self.tabs = QTabWidget()
+        self.tabEdit = QWidget()
+        self.tabFilter = QWidget()
+        self.tabAI = QWidget()
+        self.tabs.addTab(self.tabEdit, 'Edit Image')
+        self.tabs.addTab(self.tabFilter, 'Filter')
+        self.tabs.addTab(self.tabAI, 'AI tool')
+        # self.setLayout(vbox)
+        self.layout.addWidget(self.tabs, stretch = 1)
         self.centralWidget.setLayout(self.layout)
         self.showMaximized()
+
+    def tool(self):
+        self.hbox = QVBoxLayout()
+        self.labelT = QLabel("Temperature: 0")
+        self._tool(self.labelT, self.onTemperatureChanged)
+        self.labelContrast = QLabel("Contrast: 0")
+        self._tool(self.labelContrast, self.onContrastChanged)
+        # Saturation
+        self.labelSaturation = QLabel("Saturation: 0")
+        self._tool(self.labelSaturation, self.onSaturationChanged)
+        # Exposure
+        self.labelSharpness = QLabel("Sharpness: 0")
+        self._tool(self.labelSharpness, self.onSharpnessChanged)
+        # Hightlights
+        self.labelHightlights = QLabel("Hightlights: 0")
+        self._tool(self.labelHightlights, self.onHightlightsChanged)
+        #Shadows
+        self.labelShadows = QLabel("Shadows: 0")
+        self._tool(self.labelShadows, self.onShadowsChanged)
+        #Brightness
+        self.labelBrightness = QLabel("Brightness: 0")
+        self._tool(self.labelBrightness, self.onBrightnessChanged)
+        self.tabEdit.setLayout(self.hbox)
+
+    def _tool(self, label, log):
+        vbox = QVBoxLayout()
+        widgetT = QWidget()
+        widgetT.setFixedHeight(60)
+        sliderTem = QSlider(Qt.Horizontal)
+        # self.labelT = QLabel(name)
+        sliderTem.setMinimum(-100)
+        sliderTem.setMaximum(100)
+        sliderTem.valueChanged.connect(log)
+        vbox.addWidget(label)
+        vbox.addWidget(sliderTem)
+
+        widgetT.setLayout(vbox)
+        self.hbox.addWidget(widgetT)
+    
+    def onBrightnessChanged(self, value):
+        self.labelBrightness.setText('Brightness: {}'.format(value))
+
+    def onShadowsChanged(self, value):
+        self.labelShadows.setText('Shadows: {}'.format(value))
+
+    def onHightlightsChanged(self, value):
+        self.labelHightlights.setText('Hightlights: {}'.format(value))
+
+    def onSharpnessChanged(self, value):
+        self.labelSharpness.setText('Sharpness: {}'.format(value))
+
+    def onSaturationChanged(self, value):
+        self.labelSaturation.setText('Saturation: {}'.format(value))
+
+    def onContrastChanged(self, value):
+        self.labelContrast.setText('Contrast: {}'.format(value))
+
+    def onTemperatureChanged(self, value):
+        self.labelT.setText('Temperature: {}'.format(value))
+        # self.slider.valueChanged.connect(self.rotateImage)
     
     def createToolBarV(self):
         self.buttonOpen = self._createToolBar('icons/plus.png', self.open, "Ctrl+O")
@@ -85,451 +153,87 @@ class ImageCropper(QMainWindow):
         self.editToolBarV.addWidget(window)
         return toolButton
         
-
     def open(self):
-        self.editToolBarH.clear()
-        self.view.activate = False
-
-        file_name, _ = QFileDialog.getOpenFileName(
-            self, "Open file", ".", "Image Files (*.png *.jpg *.bmp)"
-        )
-        if not file_name:
-            return
-        self.image = QImage(file_name)
-        self.scene.clear()
-        self.pixmap = QPixmap.fromImage(self.image)
-        self.scene.setSceneRect(0, 0, self.image.width(), self.image.height())
-        self.scene.addPixmap(self.pixmap)
-        
+        self = open(self)   
         
     def zoomIn(self):
-        self.editToolBarH.clear()
-        self.view.activate = False
-        self.view.crop_rect = None
-        self.scale = 1.05
-        self.actionZoom()
+        self = zoomIn(self)
 
     def zoomOut(self):
-        self.editToolBarH.clear()
-        self.view.activate = False
-        self.view.crop_rect = None
-        self.scale *= 0.95
-        self.actionZoom()
+        self = zoomOut(self)
         
     def actionZoom(self):
-        if self.image is not None:
-            self.view.scale(self.scale, self.scale)
+        self = actionZoom(self)
 
     def resize(self):
-        if self.image is not None:
-            self.editToolBarH.clear()
-            self.view.activate = False
-            self.view.crop_rect = None
-            window = QWidget()
-            width = QLabel()
-            width.setText('Width:')
-            height = QLabel()
-            height.setText('Height:')
-            self.spinBoxW = QSpinBox()
-            self.spinBoxW.setMinimum(100) # Đặt giới hạn tối thiểu là 0
-            self.spinBoxW.setMaximum(2100) # Đặt giới hạn tối đa là 100
-            self.spinBoxW.setSingleStep(1) # Đặt bước tăng/giảm mặc định là 1
-            self.spinBoxW.setValue(100)
-            
-            self.spinBoxH = QSpinBox()
-            self.spinBoxH.setMinimum(100) # Đặt giới hạn tối thiểu là 0
-            self.spinBoxH.setMaximum(2100) # Đặt giới hạn tối đa là 100
-            self.spinBoxH.setSingleStep(1) # Đặt bước tăng/giảm mặc định là 1
-            self.spinBoxH.setValue(100)
-            # self.e2.setFixedSize(100, 25)
-            
-            button_action = QAction( self)
-            button_action.setIcon(QIcon('icons/check.png'))
-            button_action.triggered.connect(self.buttonClickToResize)
-            # self.spinBoxW.editingFinished.connect(button_action.trigger)
-            # self.spinBoxH.editingFinished.connect(button_action.trigger)
-
-            toolBarH = QHBoxLayout()
-            toolBarH.addWidget(width)
-            toolBarH.addWidget(self.spinBoxW)
-            toolBarH.addWidget(height)
-            toolBarH.addWidget(self.spinBoxH)
-            window.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-            window.setLayout(toolBarH)
-            self.editToolBarH.addWidget(window)
-            self.editToolBarH.addAction(button_action)
+        self = resize(self)
     
     def buttonClickToResize(self):
-        if self.spinBoxW.value() is not None and self.spinBoxH.value() is not None :
-            width = self.spinBoxW.value()
-            height = self.spinBoxH.value() 
-            self.pixmap = self.pixmap.scaled(QSize(width,height), Qt.IgnoreAspectRatio,Qt.SmoothTransformation )
-            self.scene.clear()  # Clear the scene
-            self.scene.setSceneRect(0, 0, self.pixmap.width(), self.pixmap.height())
-            self.scene.addPixmap(self.pixmap)
-            self.scene.update()     
+            self = buttonClickToResize(self)
 
     def save(self):
-        if self.image is not None:
-            self.editToolBarH.clear()
-            self.view.activate = False
-            options = QFileDialog.Options()
-            options |= QFileDialog.ReadOnly
-            file_name, _ = QFileDialog.getSaveFileName(self, "Save Image", "", "Images (*.png *.xpm *.jpg);;All Files (*)", options=options)
-            if file_name:
-                self.pixmap.save(file_name)
+        self = save(self)
 
     def crop(self):
-        # self = crop(self)
-        if self.buttonCrop.isChecked and self.image is not None:
-            self.editToolBarH.clear()
-            self.view.activate = True
-            buttonCrop = QToolButton()
-            buttonCrop.setText('OK')
-            buttonCrop.setAutoRaise(True)
-            buttonCrop.setIcon(QIcon('icons/check.png'))
-            buttonCrop.clicked.connect(self.buttonClicked)
-            left_spacer = QWidget()
-            left_spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-            right_spacer = QWidget()
-            right_spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-            self.editToolBarH.addWidget(left_spacer)
-            self.editToolBarH.addWidget(buttonCrop)
-            self.editToolBarH.addWidget(right_spacer)
-        
+        self = crop(self)
     
     def buttonClicked(self):
-        crop_start, crop_end = self.view.getResult()
-        if crop_start is not None and crop_end is not None:
-            x,y, x1, y1 = self.view.mapToScene(crop_start).x(), self.view.mapToScene(crop_start).y(), self.view.mapToScene(crop_end).x(), self.view.mapToScene(crop_end).y()
-            x = 0 if x < 0 else x
-            y = 0 if y < 0 else y
-            x1 = self.pixmap.width() if x1 > self.pixmap.width() else x1
-            y1  = self.pixmap.height() if y1 > self.pixmap.height() else y1
-            crop_rect = QRectF(x,y, x1 - x, y1 - y)
-            self.pixmap = self.pixmap.copy(crop_rect.toRect())
-            self.view.crop_rect = None
-            self.view.crop_start = None
-            self.view.crop_end = None
-            self.scene.clear()  # Clear the scene
-            self.scene.setSceneRect(0, 0, self.pixmap.width(), self.pixmap.height())
-            self.scene.addPixmap(self.pixmap)
-            self.scene.update()
+        self = buttonClicked(self)
         
-        
-
     def flipH(self):
-
-        if self.image is not None:
-            self.editToolBarH.clear()
-            self.view.activate = False
-            self.view.crop_rect = None
-            self.pixmap = self.pixmap.transformed(QTransform().scale(-1, 1))
-            self.pixmap = self.pixmap.copy()
-            self.scene.setSceneRect(0, 0, self.pixmap.width(), self.pixmap.height())
-            self.scene.clear()
-            self.scene.addPixmap(self.pixmap)
-            self.scene.update()
+        self = flipH(self)
 
     def flipV(self):
-
-        if self.image is not None:
-            self.editToolBarH.clear()
-            self.view.activate = False
-            self.view.crop_rect = None
-            self.pixmap = self.pixmap.transformed(QTransform().scale(1, -1))
-            self.pixmap = self.pixmap.copy()
-            self.scene.setSceneRect(0, 0, self.pixmap.width(), self.pixmap.height())
-            self.scene.clear()
-            self.scene.addPixmap(self.pixmap)
-            self.scene.update()
+        self = flipV(self)
 
     def rotate(self):
-        if self.image is not None:
-            self.pixmap_ = self.pixmap.copy()
-            self.editToolBarH.clear()
-            self.view.activate = False
-            self.view.crop_rect = None
-            self.slider = QSlider(Qt.Horizontal, self)
-            self.slider.setMinimum(0)
-            self.slider.setMaximum(360)
-            self.slider.setFixedWidth(self.view.width() // 2.5)
-            self.editToolBarH.clear()
-            buttonRotateL = QToolButton()
-            buttonRotateL.clicked.connect(self.rotateImage90)      
-            buttonRotateL.setIcon(QIcon('icons/rotateLeft.png'))
-            buttonRotateR = QToolButton()
-            buttonRotateR.clicked.connect(self.rotateImage_90)       
-            buttonRotateR.setIcon(QIcon('icons/rotateRight.png'))
-            self.slider.valueChanged.connect(self.rotateImage)
-            window = QWidget()
-            toolBarH = QHBoxLayout()
-            toolBarH.setSizeConstraint(QLayout.SetFixedSize)
-            toolBarH.addWidget(buttonRotateL)
-            toolBarH.addWidget(buttonRotateR)
-            toolBarH.addWidget(self.slider)
-            window.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-            window.setLayout(toolBarH)
-            left_spacer = QWidget()
-            left_spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-            right_spacer = QWidget()
-            right_spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-            self.editToolBarH.addWidget(left_spacer)
-            self.editToolBarH.addWidget(window)
-            self.editToolBarH.addWidget(right_spacer)
-
+        self = rotate(self)
 
     def rotateImage(self, angle):
-        image = self.converPixmapToCV(self.pixmap_) 
-        rotated_image = imutils.rotate_bound(image,angle)
-        pixmap = QPixmap.fromImage(QImage(rotated_image, rotated_image.shape[1], rotated_image.shape[0], rotated_image.strides[0], QImage.Format_RGB888).rgbSwapped())
-        self.pixmap = pixmap       
-        self.scene.clear()
-        self.scene.setSceneRect(0, 0, self.pixmap.width(), self.pixmap.height())       
-        self.scene.addPixmap(self.pixmap)
-        self.scene.update()
+        self = rotateImage(self, angle)
 
     def rotateImage90(self):
-        image = self.converPixmapToCV(self.pixmap) 
-        rotated_image = imutils.rotate_bound(image,-90)
-        pixmap = QPixmap.fromImage(QImage(rotated_image, rotated_image.shape[1], rotated_image.shape[0], rotated_image.strides[0], QImage.Format_RGB888).rgbSwapped())
-        self.pixmap = pixmap       
-        self.scene.clear()
-        self.scene.setSceneRect(0, 0, self.pixmap.width(), self.pixmap.height())       
-        self.scene.addPixmap(self.pixmap)
-        self.scene.update()
+        self = rotateImage90(self)
 
     def rotateImage_90(self):
-        image = self.converPixmapToCV(self.pixmap) 
-        rotated_image = imutils.rotate_bound(image,90)
-        pixmap = QPixmap.fromImage(QImage(rotated_image, rotated_image.shape[1], rotated_image.shape[0], rotated_image.strides[0], QImage.Format_RGB888).rgbSwapped())
-        self.pixmap = pixmap       
-        self.scene.clear()
-        self.scene.setSceneRect(0, 0, self.pixmap.width(), self.pixmap.height())       
-        self.scene.addPixmap(self.pixmap)
-        self.scene.update()
+        self = rotateImage_90(self)
 
     def text(self):
-        if self.image is not None:
-            self.view.activate = True
-            self.view.textFlag = True
-            self.text = QTextEdit()
-            # self.text.setMinimumSize(200,100)
-            self.editToolBarH.clear()
-            self.painter = QPainter(self.pixmap)
-            self.painter.begin(self.pixmap)           
-            fontbox = QFontComboBox(self)
-            fontbox.currentFontChanged.connect(lambda font: self.text.setCurrentFont(font))
-            fontSize = QSpinBox(self)
-            fontSize.setSuffix(" pt")
-            fontSize.valueChanged.connect(lambda size: self.text.setFontPointSize(size))
-            fontSize.setValue(14)
-    
-            fontColor = QAction(QIcon("icons/font-color.png"),"Change font color",self)
-            fontColor.triggered.connect(self.fontColorChanged)
-
-            backColor = QAction(QIcon("icons/highlight.png"),"Change background color",self)
-            backColor.triggered.connect(self.highlight)
-
-            boldAction = QAction(QIcon("icons/bold.png"),"Bold",self)
-            boldAction.triggered.connect(self.bold)
-
-            italicAction = QAction(QIcon("icons/italic.png"),"Italic",self)
-            italicAction.triggered.connect(self.italic)
-
-            underlAction = QAction(QIcon("icons/underline.png"),"Underline",self)
-            underlAction.triggered.connect(self.underline)
-
-            strikeAction = QAction(QIcon("icons/strike.png"),"Strike-out",self)
-            strikeAction.triggered.connect(self.strike)
-
-            alignLeft = QAction(QIcon("icons/align-left.png"),"Align left",self)
-            alignLeft.triggered.connect(self.alignLeft)
-
-            alignCenter = QAction(QIcon("icons/align-center.png"),"Align center",self)
-            alignCenter.triggered.connect(self.alignCenter)
-
-            alignRight = QAction(QIcon("icons/align-right.png"),"Align right",self)
-            alignRight.triggered.connect(self.alignRight)
-
-            alignJustify = QAction(QIcon("icons/align-justify.png"),"Align justify",self)
-            alignJustify.triggered.connect(self.alignJustify)
-            self.editToolBarH.addWidget(fontbox)
-            self.editToolBarH.addWidget(fontSize)
-            self.editToolBarH.addSeparator()
-            self.editToolBarH.addAction(fontColor)
-            self.editToolBarH.addAction(backColor)
-
-            self.editToolBarH.addSeparator()
-
-            self.editToolBarH.addAction(boldAction)
-            self.editToolBarH.addAction(italicAction)
-            self.editToolBarH.addAction(underlAction)
-            self.editToolBarH.addAction(strikeAction)
-
-            self.editToolBarH.addSeparator()
-            self.editToolBarH.addAction(alignLeft)
-            self.editToolBarH.addAction(alignCenter)
-            self.editToolBarH.addAction(alignRight)
-            self.editToolBarH.addAction(alignJustify)
-            button_action_text = QAction(self)
-            button_action_text.setIcon(QIcon('icons/check.png'))
-            button_action_text.triggered.connect(self.buttonClickToSetText)
-            self.button_action_text_Pm = QAction(self)
-            self.editToolBarH.addAction(button_action_text)
+        self = text(self)
 
     def buttonClickToSetText(self):
-        self.crop_start, self.crop_end = self.view.getResult()
-        print(self.crop_start, self.crop_end)
-        # self.text = QTextEdit()
-        # if not self.text.isVisible():
-        #     print(1)
-        #     self.text = QTextEdit()
-        try:
-            self.text.deleteLater()
-            self.button_action_text_Pm.deleteLater()
-        except:
-            # print(1)
-            pass
-            # self.text = QTextEdit()
-            # self.text.setFixedSize(self.x1 - self.x, self.y1 - self.y)
-            # self.text.move(self.x,self.y)
-            # self.scene.addWidget(self.text)
-        if self.crop_start is not None and self.crop_end is not None:
-            # print(2)
-            x,y, x1, y1 = self.view.mapToScene(self.crop_start).x(), self.view.mapToScene(self.crop_start).y(), self.view.mapToScene(self.crop_end).x(), self.view.mapToScene(self.crop_end).y()
-            x = 0 if x < 0 else x
-            y = 0 if y < 0 else y
-            x1 = self.pixmap.width() if x1 > self.pixmap.width() else x1
-            y1  = self.pixmap.height() if y1 > self.pixmap.height() else y1
-            self.x = x
-            self.y = y
-            self.x1 = x1
-            self.y1 = y1
-            # crop_rect = QRectF(x,y, x1 - x, y1 - y)
-            self.text = QTextEdit()
-            self.text.setFixedSize(self.x1 - self.x, self.y1 - self.y)
-            self.text.move(self.x,self.y)
-            
-            self.view.crop_rect = None
-            self.scene.addWidget(self.text)
-            self.button_action_text_Pm = QAction("OK",self)
-            self.button_action_text_Pm.triggered.connect(self.buttonClickToSetTextPixmap)
-            self.editToolBarH.addAction(self.button_action_text_Pm)
-            
-        # else:
-        #     self.text = QTextEdit()
-        #     self.text.setMinimumSize(200,100)
-        #     self.button_action_text_Pm = QAction("OK",self)
-        #     self.button_action_text_Pm.triggered.connect(self.buttonClickToSetTextPixmap)
-        #     self.editToolBarH.addAction(self.button_action_text_Pm)
-        #     self.scene.addWidget(self.text)
-        
+        self = buttonClickToSetText(self)
 
     def buttonClickToSetTextPixmap(self):
-        self.text.deleteLater()
-        self.button_action_text_Pm.deleteLater()
-        if self.text.isVisible():
-            self.crop_start = None
-            self.crop_end = None
-        # self.text.setVisible(False)
-            text = self.text.toPlainText().split("\n")
-            self.pen = QPen(self.text.currentCharFormat().foreground().color())
-            cursor = self.text.textCursor()
-            cursor.movePosition(QTextCursor.Start)
-            cursor.movePosition(QTextCursor.End, QTextCursor.KeepAnchor)
-            format = cursor.charFormat()
-            self.font = self.text.currentFont()
-            if format.fontItalic():
-                self.font.setItalic(True)
-            if format.fontUnderline():
-                self.font.setUnderline(True)
-            if format.fontStrikeOut():
-                self.font.setStrikeOut(True)
-            self.painter.setFont(self.font)
-            self.painter.setPen(self.pen)
-            x = self.x
-            y = self.y
-            try:
-                for i in range(len(text)):
-                    x = self.x + i * self.font.pointSize() + 10
-                    y = self.y + i * self.font.pointSize()
-                    self.painter.drawText(x, y, text[i])
-            except:
-                self.x = 10
-                self.y = 10
-                for i in range(len(text)):
-                    x = self.x + i * self.font.pointSize() + 10
-                    y = self.y + i * self.font.pointSize()
-                    self.painter.drawText(x, y, text[i])
-            self.scene.clear()
-            self.scene.addPixmap(self.pixmap)
-            self.scene.update()
-            
-
-
-    
-            
-
-    def updateView(self):
-        matrix = QTransform().scale(self.view.viewport().width() / self.scene.width(), self.view.viewport().height() / self.scene.height())
-        self.view.setTransform(matrix)
-
-    def convertCVtoPixmap(self, image):
-        return QPixmap.fromImage(QImage(self.image.data, self.image.shape[1], self.image.shape[0], 3*self.image.shape[1], QImage.Format_RGB888).rgbSwapped())
-
-    def converPixmapToCV(self, pixmap):
-        image_data = qimage2ndarray.rgb_view(pixmap.toImage())
-        image_data = cv2.cvtColor(image_data, cv2.COLOR_RGB2BGR)
-        # image_data = image_data.reshape(pixmap.height(), pixmap.width(), 3)
-        return image_data
+        self = buttonClickToSetTextPixmap(self)          
 
     def fontColorChanged(self):
-        color = QColorDialog.getColor()
-        self.text.setTextColor(color)
+        self = fontColorChanged(self)
         
     def highlight(self):
-       color = QColorDialog.getColor()
-       self.text.setTextBackgroundColor(color)
+       self = highlight(self)
         
     def bold(self):
-        if self.text.fontWeight() == QFont.Bold:
-            self.text.setFontWeight(QFont.Normal)
-        else:
-            self.text.setFontWeight(QFont.Bold)
+        self = bold(self)
     
     def italic(self):
-        state = self.text.fontItalic()
-        self.text.setFontItalic(not state)
-
+        self = italic(self)
 
     def underline(self):
-        state = self.text.fontUnderline()
-        self.text.setFontUnderline(not state)
-
+        self = underline(self)
 
     def strike(self):
-        fmt = self.text.currentCharFormat()
-        fmt.setFontStrikeOut(not fmt.fontStrikeOut())
-        self.text.setCurrentCharFormat(fmt)
+        self = strike(self)
         
     def alignLeft(self):
-        self.text.setAlignment(Qt.AlignLeft)
+        self = alignLeft(self)
 
     def alignRight(self):
-        self.text.setAlignment(Qt.AlignRight)
+        self = alignRight(self)
 
     def alignCenter(self):
-        self.text.setAlignment(Qt.AlignCenter)
+        self = alignCenter(self)
     
     def alignJustify(self):
-        self.text.setAlignment(Qt.AlignJustify)
+        self = alignJustify(self)
 
-
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    win = ImageCropper()
-    win.show()
-    sys.exit(app.exec_())
