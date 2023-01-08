@@ -154,7 +154,6 @@ def flipV(self):
         self.view.crop_rect = None
         self.pixmap = self.pixmap.transformed(QTransform().scale(1, -1))
         self.pixmap = self.pixmap.copy()
-        self.scene.setSceneRect(0, 0, self.pixmap.width(), self.pixmap.height())
         self.scene.clear()
         self.scene.addPixmap(self.pixmap)
         self.scene.update()
@@ -298,8 +297,7 @@ def buttonClickToSetText(self):
         self.y1 = y1
         self.text = QTextEdit()
         self.text.setFixedSize(self.x1 - self.x, self.y1 - self.y)
-        self.text.move(self.x,self.y)
-        
+        self.text.move(self.x,self.y)      
         self.view.crop_rect = None
         self.scene.addWidget(self.text)
         self.button_action_text_Pm = QAction("OK",self)
@@ -345,8 +343,8 @@ def buttonClickToSetTextPixmap(self):
         self.scene.addPixmap(self.pixmap)
         self.scene.update()
 
-def convertCVtoPixmap(self, image):
-    return QPixmap.fromImage(QImage(self.image.data, self.image.shape[1], self.image.shape[0], 3*self.image.shape[1], QImage.Format_RGB888).rgbSwapped())
+# def convertCVtoPixmap(self, image):
+#     return QPixmap.fromImage(QImage(self.image.data, self.image.shape[1], self.image.shape[0], 3*self.image.shape[1], QImage.Format_RGB888).rgbSwapped())
 
 def converPixmapToCV(pixmap):
     image_data = qimage2ndarray.rgb_view(pixmap.toImage())

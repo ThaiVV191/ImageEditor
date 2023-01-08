@@ -1,14 +1,11 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-import sys
-from actions import *
-import cv2
-import numpy as np
 import imutils
+import copy
 import qimage2ndarray
 from customQGraphicsView import customQGraphicsView
-
+from lb.backend.edittool import *
 from lb.backend.general.general import *
 
 class ImageCropper(QMainWindow):
@@ -16,6 +13,13 @@ class ImageCropper(QMainWindow):
         super().__init__()
         self.scale = 1
         self.image = None
+        self.temperature = ()
+        self.contrast = ()
+        self.saturation = ()
+        self.sharpness = ()
+        self.highlights = ()
+        self.shadows = ()
+        self.brightness = ()
         self.initUI()
         self.tool()
         self.createToolBarV()
@@ -52,7 +56,7 @@ class ImageCropper(QMainWindow):
         self.centralWidget.setLayout(self.layout)
         self.showMaximized()
 
-    def tool(self):
+    def tool(self):      
         self.hbox = QVBoxLayout()
         self.labelT = QLabel("Temperature: 0")
         self._tool(self.labelT, self.onTemperatureChanged)
@@ -80,38 +84,42 @@ class ImageCropper(QMainWindow):
         widgetT = QWidget()
         widgetT.setFixedHeight(60)
         sliderTem = QSlider(Qt.Horizontal)
-        # self.labelT = QLabel(name)
         sliderTem.setMinimum(-100)
         sliderTem.setMaximum(100)
         sliderTem.valueChanged.connect(log)
         vbox.addWidget(label)
         vbox.addWidget(sliderTem)
-
         widgetT.setLayout(vbox)
         self.hbox.addWidget(widgetT)
     
     def onBrightnessChanged(self, value):
-        self.labelBrightness.setText('Brightness: {}'.format(value))
+        if self.image is not None:
+            onBrightnessChanged(self, value, self.pixmap)
 
     def onShadowsChanged(self, value):
-        self.labelShadows.setText('Shadows: {}'.format(value))
+        if self.image is not None:
+            onShadowsChanged(self, value, self.pixmap)
 
     def onHightlightsChanged(self, value):
-        self.labelHightlights.setText('Hightlights: {}'.format(value))
+        if self.image is not None:
+            onHightlightsChanged(self, value,self.pixmap)
 
     def onSharpnessChanged(self, value):
-        self.labelSharpness.setText('Sharpness: {}'.format(value))
+        if self.image is not None:
+            onSharpnessChanged(self, value, self.pixmap)
 
     def onSaturationChanged(self, value):
-        self.labelSaturation.setText('Saturation: {}'.format(value))
+        if self.image is not None:
+            onSaturationChanged(self, value, self.pixmap)
 
     def onContrastChanged(self, value):
-        self.labelContrast.setText('Contrast: {}'.format(value))
-
+        if self.image is not None:
+            onContrastChanged(self, value, self.pixmap)
+       
     def onTemperatureChanged(self, value):
-        self.labelT.setText('Temperature: {}'.format(value))
-        # self.slider.valueChanged.connect(self.rotateImage)
-    
+        if self.image is not None:
+            onTemperatureChanged(self, value, self.pixmap)
+ 
     def createToolBarV(self):
         self.buttonOpen = self._createToolBar('icons/plus.png', self.open, "Ctrl+O")
         self.buttonSave = self._createToolBar('icons/save.png', self.save, "Ctrl+S")
@@ -154,86 +162,86 @@ class ImageCropper(QMainWindow):
         return toolButton
         
     def open(self):
-        self = open(self)   
+        open(self)   
         
     def zoomIn(self):
-        self = zoomIn(self)
+        zoomIn(self)
 
     def zoomOut(self):
-        self = zoomOut(self)
+        zoomOut(self)
         
     def actionZoom(self):
-        self = actionZoom(self)
+        actionZoom(self)
 
     def resize(self):
-        self = resize(self)
+        resize(self)
     
     def buttonClickToResize(self):
-            self = buttonClickToResize(self)
+            buttonClickToResize(self)
 
     def save(self):
-        self = save(self)
+        save(self)
 
     def crop(self):
-        self = crop(self)
+        crop(self)
     
     def buttonClicked(self):
-        self = buttonClicked(self)
+        buttonClicked(self)
         
     def flipH(self):
-        self = flipH(self)
+        flipH(self)
 
     def flipV(self):
-        self = flipV(self)
+        flipV(self)
 
     def rotate(self):
-        self = rotate(self)
+        rotate(self)
 
     def rotateImage(self, angle):
-        self = rotateImage(self, angle)
+        rotateImage(self, angle)
 
     def rotateImage90(self):
-        self = rotateImage90(self)
+        rotateImage90(self)
 
     def rotateImage_90(self):
-        self = rotateImage_90(self)
+        rotateImage_90(self)
 
     def text(self):
-        self = text(self)
+        text(self)
 
     def buttonClickToSetText(self):
-        self = buttonClickToSetText(self)
+        buttonClickToSetText(self)
 
     def buttonClickToSetTextPixmap(self):
-        self = buttonClickToSetTextPixmap(self)          
+        buttonClickToSetTextPixmap(self)          
 
     def fontColorChanged(self):
-        self = fontColorChanged(self)
+        fontColorChanged(self)
         
     def highlight(self):
-       self = highlight(self)
+       highlight(self)
         
     def bold(self):
-        self = bold(self)
+        bold(self)
     
     def italic(self):
-        self = italic(self)
+        italic(self)
 
     def underline(self):
-        self = underline(self)
+        underline(self)
 
     def strike(self):
-        self = strike(self)
+        strike(self)
         
     def alignLeft(self):
-        self = alignLeft(self)
+        alignLeft(self)
 
     def alignRight(self):
-        self = alignRight(self)
+        alignRight(self)
 
     def alignCenter(self):
-        self = alignCenter(self)
+        alignCenter(self)
     
     def alignJustify(self):
-        self = alignJustify(self)
+        alignJustify(self)
 
