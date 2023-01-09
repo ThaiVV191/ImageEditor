@@ -6,6 +6,7 @@ import copy
 import qimage2ndarray
 from customQGraphicsView import customQGraphicsView
 from lb.backend.edittool import *
+from lb.backend.filter import *
 from lb.backend.general.general import *
 
 class ImageCropper(QMainWindow):
@@ -21,8 +22,11 @@ class ImageCropper(QMainWindow):
         self.shadows = ()
         self.brightness = ()
         self.initUI()
-        self.tool()
+        self.toolFilter()
+        self.toolEdit()
+        
         self.createToolBarV()
+        
 
 
     def initUI(self):
@@ -47,16 +51,48 @@ class ImageCropper(QMainWindow):
         self.tabs = QTabWidget()
         self.tabEdit = QWidget()
         self.tabFilter = QWidget()
+        self.tabFilter.setFixedWidth(245)
         self.tabAI = QWidget()
         self.tabs.addTab(self.tabEdit, 'Edit Image')
         self.tabs.addTab(self.tabFilter, 'Filter')
         self.tabs.addTab(self.tabAI, 'AI tool')
-        # self.setLayout(vbox)
         self.layout.addWidget(self.tabs, stretch = 1)
         self.centralWidget.setLayout(self.layout)
         self.showMaximized()
 
-    def tool(self):      
+    def toolFilter(self):       
+        self.hboxTool = QVBoxLayout()
+        self.blur, self.blurBin  = self.createtoolFilter('Box blur', self.boxBlur, True)
+        self.blur1, self.gaus = self.createtoolFilter('Gaussian blur', self.gaussianBlur, True)
+        self.blur2, self.med = self.createtoolFilter('Median blur', self.medianBlur, True)
+        self.blur3, _ = self.createtoolFilter('Emboss', self.emboss, False)
+        # self.blur.setAutoRaise(True)
+        self.hboxTool.addWidget(self.blur)
+        self.hboxTool.addWidget(self.blur1)
+        self.hboxTool.addWidget(self.blur2)
+        self.hboxTool.addWidget(self.blur3)
+        self.tabFilter.setLayout(self.hboxTool)
+        
+
+    def createtoolFilter(self, name, log, flag):
+        hboxTool = QHBoxLayout()
+        widgetFilter = QWidget()
+        button_action = QPushButton('OK')
+        button_action.clicked.connect(log)
+        labelT = QLabel(name)
+        spinBoxW = QSpinBox()
+        spinBoxW.setMinimum(1)
+        spinBoxW.setSingleStep(2)
+        spinBoxW.setValue(3)
+        hboxTool.addWidget(labelT)
+        if flag:
+            hboxTool.addWidget(spinBoxW)    
+        hboxTool.addWidget(button_action)   
+        widgetFilter.setLayout(hboxTool)
+        return widgetFilter, spinBoxW
+        
+
+    def toolEdit(self):      
         self.hbox = QVBoxLayout()
         self.labelT = QLabel("Temperature: 0")
         self._tool(self.labelT, self.onTemperatureChanged)
@@ -91,7 +127,19 @@ class ImageCropper(QMainWindow):
         vbox.addWidget(sliderTem)
         widgetT.setLayout(vbox)
         self.hbox.addWidget(widgetT)
-    
+
+    def emboss(self):
+        emboss(self, self.pixmap)
+
+    def boxBlur(self):
+        boxBlur(self, self.pixmap)
+
+    def gaussianBlur(self):
+        gaussianBlur(self, self.pixmap)
+
+    def medianBlur(self):
+        medianBlur(self, self.pixmap)
+
     def onBrightnessChanged(self, value):
         if self.image is not None:
             onBrightnessChanged(self, value, self.pixmap)

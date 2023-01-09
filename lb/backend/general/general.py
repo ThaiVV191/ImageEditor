@@ -147,7 +147,6 @@ def flipH(self):
         self.scene.update()
 
 def flipV(self):
-
     if self.image is not None:
         self.editToolBarH.clear()
         self.view.activate = False
