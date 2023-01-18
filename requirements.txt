@@ -1,0 +1,6 @@
+basicsr>=1.4.2
+numpy
+Pillow
+torch>=1.7
+torchvision
+tqdm

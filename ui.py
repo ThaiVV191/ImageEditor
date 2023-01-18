@@ -23,11 +23,10 @@ class ImageCropper(QMainWindow):
         self.brightness = ()
         self.initUI()
         self.toolFilter()
-        self.toolEdit()
-        
+        self.toolEdit()    
+        self.toolAI()   
         self.createToolBarV()
         
-
 
     def initUI(self):
         self.setWindowTitle("Python Menus & Toolbars")
@@ -60,6 +59,19 @@ class ImageCropper(QMainWindow):
         self.centralWidget.setLayout(self.layout)
         self.showMaximized()
 
+    def toolAI(self):       
+        self.hboxTool = QVBoxLayout()
+        self.blur, self.blurBin  = self.createtoolFilter('Box blur', self.boxBlur, False)
+        self.blur1, self.gaus = self.createtoolFilter('Gaussian blur', self.gaussianBlur, False)
+        self.blur2, self.med = self.createtoolFilter('Median blur', self.medianBlur, False)
+        self.blur3, _ = self.createtoolFilter('Emboss', self.emboss, False)
+        # self.blur.setAutoRaise(True)
+        self.hboxTool.addWidget(self.blur)
+        self.hboxTool.addWidget(self.blur1)
+        self.hboxTool.addWidget(self.blur2)
+        self.hboxTool.addWidget(self.blur3)
+        self.tabAI.setLayout(self.hboxTool)
+
     def toolFilter(self):       
         self.hboxTool = QVBoxLayout()
         self.blur, self.blurBin  = self.createtoolFilter('Box blur', self.boxBlur, True)
@@ -77,14 +89,14 @@ class ImageCropper(QMainWindow):
     def createtoolFilter(self, name, log, flag):
         hboxTool = QHBoxLayout()
         widgetFilter = QWidget()
-        button_action = QPushButton('OK')
+        button_action = QPushButton(name)
         button_action.clicked.connect(log)
-        labelT = QLabel(name)
+        # labelT = QLabel(name)
         spinBoxW = QSpinBox()
         spinBoxW.setMinimum(1)
         spinBoxW.setSingleStep(2)
         spinBoxW.setValue(3)
-        hboxTool.addWidget(labelT)
+        # hboxTool.addWidget(labelT)
         if flag:
             hboxTool.addWidget(spinBoxW)    
         hboxTool.addWidget(button_action)   
