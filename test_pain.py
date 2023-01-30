@@ -112,12 +112,11 @@ class Window(QMainWindow):
  
     def setCursor_(self):
         pixmap = QPixmap("black-dot.png")
-        # painter = QPainter(pixmap)
-        # pixmap = QPixmap(100, 100)
+
         cursor_scaled_pix = pixmap.scaled(QSize(self.brushSize, self.brushSize), Qt.KeepAspectRatio)
         painter = QPainter(cursor_scaled_pix)
         painter.setBrush(QColor(self.brushColor))
-        painter.drawEllipse(0, 0, cursor_scaled_pix.width(), cursor_scaled_pix.height())
+        painter.drawEllipse(cursor_scaled_pix.width()//10, cursor_scaled_pix.height()//10, cursor_scaled_pix.width()//1.1, cursor_scaled_pix.height()//1.1)
         painter.end()
         # create a QCursor from the QPixmap
         self.cursor = QCursor(cursor_scaled_pix)
