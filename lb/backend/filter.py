@@ -8,37 +8,33 @@ import numpy as np
 
 
 def emboss(self, pixmap):
-    if self.image is not None:
-        image = converPixmapToCV(pixmap)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        image = Image.fromarray(image)
-        im_emboss = image.filter(ImageFilter.EMBOSS)
-        pixmap_new =  convertPILtoPixmap(im_emboss)
-        updateView(self, pixmap_new)
+    image = converPixmapToCV(pixmap)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image = Image.fromarray(image)
+    im_emboss = image.filter(ImageFilter.EMBOSS)
+    pixmap_new =  convertPILtoPixmap(im_emboss)
+    updateView(self, pixmap_new)
 
 def boxBlur(self, pixmap):
-    if self.image is not None:
-        image = converPixmapToCV(pixmap)
-        ksize = (self.blurBin.value(), self.blurBin.value())
-        image = cv2.blur(image, ksize)
-        pixmap_new =  convertCVtoPixmap(image)
-        updateView(self, pixmap_new)
+    image = converPixmapToCV(pixmap)
+    ksize = (self.blurBin.value(), self.blurBin.value())
+    image = cv2.blur(image, ksize)
+    pixmap_new =  convertCVtoPixmap(image)
+    updateView(self, pixmap_new)
 
 def medianBlur(self, pixmap):
-    if self.image is not None:
-        image = converPixmapToCV(pixmap)
-        ksize =self.med.value()
-        image = cv2.medianBlur(image, ksize)
-        pixmap_new =  convertCVtoPixmap(image)
-        updateView(self, pixmap_new)
+    image = converPixmapToCV(pixmap)
+    ksize =self.med.value()
+    image = cv2.medianBlur(image, ksize)
+    pixmap_new =  convertCVtoPixmap(image)
+    updateView(self, pixmap_new)
 
 def gaussianBlur(self, pixmap):
-    if self.image is not None:
-        image = converPixmapToCV(pixmap)
-        ksize = (self.gaus.value(), self.gaus.value())
-        image = cv2.GaussianBlur(image, ksize, 0)
-        pixmap_new =  convertCVtoPixmap(image)
-        updateView(self, pixmap_new)
+    image = converPixmapToCV(pixmap)
+    ksize = (self.gaus.value(), self.gaus.value())
+    image = cv2.GaussianBlur(image, ksize, 0)
+    pixmap_new =  convertCVtoPixmap(image)
+    updateView(self, pixmap_new)
 
 def updateView(self, pixmap):
     self.scene.clear()

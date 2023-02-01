@@ -46,9 +46,9 @@ class RealESRGANer():
 
         # initialize model
         if gpu_id:
-            # self.device = torch.device(
-            #     f'cuda:{gpu_id}' if torch.cuda.is_available() else 'cpu') if device is None else device
-            self.device = 'cpu'
+            self.device = torch.device(
+                f'cuda:{gpu_id}' if torch.cuda.is_available() else 'cpu')
+            # self.device = 'cpu'
         else:
             # self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') if device is None else device
             self.device = 'cpu'
@@ -114,7 +114,9 @@ class RealESRGANer():
 
     def process(self):
         # model inference
+        # print("*" * 10, self.img.shape)
         self.output = self.model(self.img)
+        # print("*" * 10, self.output.shape)
 
     def tile_process(self):
         """It will first crop input images to tiles, and then process each tile.
@@ -260,7 +262,8 @@ class RealESRGANer():
                 output, (
                     int(w_input * outscale),
                     int(h_input * outscale),
-                ), interpolation=cv2.INTER_LANCZOS4)
+                # ), interpolation=cv2.INTER_LANCZOS4)
+                ), interpolation=cv2.INTER_LINEAR)
 
         return output, img_mode
 
