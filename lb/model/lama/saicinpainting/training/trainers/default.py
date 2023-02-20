@@ -11,7 +11,7 @@ from lb.model.lama.saicinpainting.training.modules.fake_fakes import FakeFakesGe
 from lb.model.lama.saicinpainting.training.trainers.base import BaseInpaintingTrainingModule, make_multiscale_noise
 from lb.model.lama.saicinpainting.utils import add_prefix_to_keys, get_ramp
 
-LOGGER = logging.getLogger(__name__)
+# LOGGER = logging.getLogger(__name__)
 
 
 def make_constant_area_crop_batch(batch, **kwargs):
@@ -68,7 +68,7 @@ class DefaultInpaintingTrainingModule(BaseInpaintingTrainingModule):
             masked_img = torch.cat([masked_img, mask], dim=1)
 
         batch['predicted_image'] = self.generator(masked_img)
-        # batch['inpainted'] = mask * batch['predicted_image'] + (1 - mask) * batch['image']
+        batch['inpainted'] = mask * batch['predicted_image'] + (1 - mask) * batch['image']
 
         if self.fake_fakes_proba > 1e-3:
             if self.training and torch.rand(1).item() < self.fake_fakes_proba:

@@ -8,8 +8,22 @@ import torch
 from PIL import Image
 device = torch.device(f'cuda' if torch.cuda.is_available() else 'cpu')
 
+def ceil_modulo(x, mod):
+    if x % mod == 0:
+        return x
+    return (x // mod + 1) * mod
+
+
+def pad_img_to_modulo(img, mod):
+    channels, height, width = img.shape
+    out_height = ceil_modulo(height, mod)
+    out_width = ceil_modulo(width, mod)
+    return np.pad(img, ((0, 0), (0, out_height - height), (0, out_width - width)), mode='symmetric')
+
+
 def load_image(image, mode='RGB', return_orig=False):
     img = np.array(image.convert(mode))
+    
     if img.ndim == 3:
         img = np.transpose(img, (2, 0, 1))
     out_img = img.astype('float32') / 255
@@ -22,15 +36,18 @@ def load_image(image, mode='RGB', return_orig=False):
 def lama(self, pixmap, black):
     image = Image.fromarray(qimage2ndarray.rgb_view(pixmap.toImage()))
     mask = Image.fromarray(qimage2ndarray.rgb_view(black.toImage()))
-    image = load_image(image, mode='RGB')
+    
+    image = load_image(image, mode='RGB')    
     mask = np.expand_dims(load_image(mask, mode='L'),axis=0)
-    # print(image.size, mask.size)
+    image = pad_img_to_modulo(image, 8)
+    mask = pad_img_to_modulo(mask, 8)
     batch = dict()
     batch['image'] = torch.unsqueeze(torch.tensor(image),dim=0).to(device)
-    batch['mask'] = torch.unsqueeze(torch.tensor(mask),dim=0).to(device)
+    batch['mask'] = torch.unsqueeze(torch.tensor(mask),dim=0)
+    batch['mask'] = ((batch['mask'] > 0) * 1).to(device)
     with torch.no_grad():  
         batch = self.modelLama(batch) 
-        cur_res = batch['predicted_image'][0].permute(1, 2, 0).detach().cpu().numpy()
+        cur_res = batch['inpainted'][0].permute(1, 2, 0).detach().cpu().numpy()
         cur_res = np.clip(cur_res * 255, 0, 255).astype('uint8')
         cur_res = cv2.cvtColor(cur_res, cv2.COLOR_RGB2BGR)
     pixmap = convertCVtoPixmap(cur_res)

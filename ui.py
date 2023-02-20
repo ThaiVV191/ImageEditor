@@ -154,7 +154,7 @@ class ImageCropper(QMainWindow):
         return widgetFilter, spinBoxW
         
 
-    def toolEdit(self):      
+    def toolEdit(self):     
         self.hbox = QVBoxLayout()
         self.labelT = QLabel("Temperature: 0")
         self._tool(self.labelT, self.onTemperatureChanged)
@@ -192,6 +192,7 @@ class ImageCropper(QMainWindow):
 
     def superResolution(self):
         if self.image is not None:
+            self.painting = False
             superResolution(self, self.pixmap)
 
     def inpainting(self):
@@ -286,12 +287,11 @@ class ImageCropper(QMainWindow):
     def paintEvent(self, event):
         if self.painting and self.image is not None:
         # create a canvas
-            canvasPainter = QPainter(self)          
+            canvasPainter = QPainter()          
             # draw rectangle  on the canvas
             canvasPainter.drawPixmap(self.rect(), self.pixmap, self.pixmap.rect())
 
     def updateView(self):
-        self.view.repaint()
         self.scene.clear()
         self.scene.addPixmap(self.pixmap)
         # self.pixmap = pixmap
@@ -302,46 +302,57 @@ class ImageCropper(QMainWindow):
 
     def emboss(self):
         if self.image is not None:
+            self.painting = False
             emboss(self, self.pixmap)
 
     def boxBlur(self):
         if self.image is not None:
+            self.painting = False
             boxBlur(self, self.pixmap)
 
     def gaussianBlur(self):
         if self.image is not None:
+            self.painting = False
             gaussianBlur(self, self.pixmap)
 
     def medianBlur(self):
         if self.image is not None:
+            self.painting = False
             medianBlur(self, self.pixmap)
 
     def onBrightnessChanged(self, value):
         if self.image is not None:
+            self.painting = False
             onBrightnessChanged(self, value, self.pixmap)
 
     def onShadowsChanged(self, value):
         if self.image is not None:
+            self.painting = False
             onShadowsChanged(self, value, self.pixmap)
 
     def onHightlightsChanged(self, value):
         if self.image is not None:
+            self.painting = False
             onHightlightsChanged(self, value,self.pixmap)
 
     def onSharpnessChanged(self, value):
         if self.image is not None:
+            self.painting = False
             onSharpnessChanged(self, value, self.pixmap)
 
     def onSaturationChanged(self, value):
         if self.image is not None:
+            self.painting = False
             onSaturationChanged(self, value, self.pixmap)
 
     def onContrastChanged(self, value):
         if self.image is not None:
+            self.painting = False
             onContrastChanged(self, value, self.pixmap)
        
     def onTemperatureChanged(self, value):
         if self.image is not None:
+            self.painting = False
             onTemperatureChanged(self, value, self.pixmap)
  
     def createToolBarV(self):
@@ -386,42 +397,55 @@ class ImageCropper(QMainWindow):
         return toolButton
         
     def openfile(self):
+        self.painting = False
         openfile(self)   
         
     def zoomIn(self):
+        self.painting = False
         zoomIn(self)
 
     def zoomOut(self):
+        self.painting = False
         zoomOut(self)
         
     def actionZoom(self):
+        self.painting = False
         actionZoom(self)
 
     def resize(self):
+        self.painting = False
         resize(self)
     
     def buttonClickToResize(self):
-            buttonClickToResize(self)
+        self.painting = False
+        buttonClickToResize(self)
 
     def save(self):
+        self.painting = False
         save(self)
 
     def crop(self):
+        self.painting = False
         crop(self)
     
     def buttonClicked(self):
+        self.painting = False
         buttonClicked(self)
         
     def flipH(self):
+        self.painting = False
         flipH(self)
 
     def flipV(self):
+        self.painting = False
         flipV(self)
 
     def rotate(self):
+        self.painting = False
         rotate(self)
 
     def rotateImage(self, angle):
+        self.painting = False
         rotateImage(self, angle)
 
     def rotateImage90(self):
@@ -431,6 +455,7 @@ class ImageCropper(QMainWindow):
         rotateImage_90(self)
 
     def text(self):
+        self.painting = False
         text(self)
 
     def buttonClickToSetText(self):
