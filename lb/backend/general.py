@@ -8,15 +8,15 @@ import qimage2ndarray
 
 def openfile(self):
     self.editToolBarH.clear()
+    self.scale = 1
     self.view.activate = False
 
     file_name, _ = QFileDialog.getOpenFileName(
-        self, "Open file", ".", "Image Files (*.png *.jpg *.bmp)"
+        self, "Open file", ".", "Image Files (*.png *.jpg *.bmp *.jpeg)"
     )
     if not file_name:
         return
     self.image = QImage(file_name)
-    self.scene.clear()
     self.pixmap = QPixmap.fromImage(self.image)
     self.scene.setSceneRect(0, 0, self.image.width(), self.image.height())
     self.scene.addPixmap(self.pixmap)
@@ -329,7 +329,7 @@ def buttonClickToSetTextPixmap(self):
         try:
             for i in range(len(text)):
                 x = self.x + i * self.font.pointSize() + 10
-                y = self.y + i * self.font.pointSize()
+                y = self.y + i * self.font.pointSize() + 30
                 self.painter.drawText(x, y, text[i])
         except:
             self.x = 10

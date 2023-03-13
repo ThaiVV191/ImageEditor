@@ -65,11 +65,13 @@ def inpainting(self):
 
 def updateView(self, pixmap):
     self.scene.clear()
+    self.scene.setSceneRect(0, 0, pixmap.width(), pixmap.height())
     self.scene.addPixmap(pixmap)
     self.pixmap = pixmap
+    self.scene.update()
 
 def convertCVtoPixmap( rotated_image):
-    return QPixmap.fromImage(QImage(rotated_image, rotated_image.shape[1], rotated_image.shape[0],rotated_image.shape[1] * rotated_image.shape[2], QImage.Format_RGB888).rgbSwapped())
+    return QPixmap.fromImage(QImage(rotated_image.tobytes(), rotated_image.shape[1], rotated_image.shape[0],rotated_image.shape[1] * rotated_image.shape[2], QImage.Format_RGB888).rgbSwapped())
 
 def convertPILtoPixmap( rotated_image):
     np_image = np.array(rotated_image)

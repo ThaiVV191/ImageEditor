@@ -63,14 +63,14 @@ class ImageCropper(QMainWindow):
         model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=2)
         netscale = 2
         # wdn_model_path = '/home/thaivv/ImageEditor/lb/model/realesrgan/weight/RealESRGAN_x4plus.pth'
-        model_path = '/home/thaivv/ImageEditor/lb/model/realesrgan/weight/RealESRGAN_x2plus.pth'
+        model_path = '/home/thaivv/ImageEditor/lb/model/realesrgan/weight/net_g_20000.pth'
         dni_weight = None
         tile = 0
         tile_pad = 10
         pre_pad = 0
         half = False
         gpu_id = 0
-        self.outscale = 1
+        self.outscale = 2
         self.upsampler = RealESRGANer(
             scale=netscale,
             model_path=model_path,
@@ -130,11 +130,9 @@ class ImageCropper(QMainWindow):
         self.blur, self.blurBin  = self.createtoolFilter('Box blur', self.boxBlur, True)
         self.blur1, self.gaus = self.createtoolFilter('Gaussian blur', self.gaussianBlur, True)
         self.blur2, self.med = self.createtoolFilter('Median blur', self.medianBlur, True)
-        self.blur3, _ = self.createtoolFilter('Emboss', self.emboss, False)
         self.hboxTool.addWidget(self.blur)
         self.hboxTool.addWidget(self.blur1)
         self.hboxTool.addWidget(self.blur2)
-        self.hboxTool.addWidget(self.blur3)
         self.tabFilter.setLayout(self.hboxTool)
         
 
@@ -267,8 +265,8 @@ class ImageCropper(QMainWindow):
                 # draw line from the last point of cursor to the current point
                 point1 = self.view.mapToScene(self.lastPoint)
                 point2 = self.view.mapToScene(event.pos())
-                point3 = QPointF(point1.x() - 1.5*self.dentaY , point1.y() - self.dentaX / 2 - 7)
-                point4 = QPointF(point2.x() - 1.5*self.dentaY, point2.y() - self.dentaX / 2 - 7)
+                point3 = QPointF(point1.x() - 1.5*self.dentaY , point1.y() - self.dentaX / 2)
+                point4 = QPointF(point2.x() - 1.5*self.dentaY, point2.y() - self.dentaX / 2)
                 painter.drawLine(point3 , point4)
                 painterBlack.drawLine(point3 , point4)
                 #self.view.mapToScene(event.pos())
@@ -398,6 +396,7 @@ class ImageCropper(QMainWindow):
         
     def openfile(self):
         self.painting = False
+        self.scene.clear()
         openfile(self)   
         
     def zoomIn(self):

@@ -2,11 +2,10 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import sys
-from actions import *
-import cv2
-# from PyQt5.QtGui import QMatrix
-from customQGraphicsView import customQGraphicsView
+from ui import ImageCropper
 
-class Main(QMainWindow):
-    def __init__(self) -> None:
-        super().__init__()
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    win = ImageCropper()
+    win.show()
+    sys.exit(app.exec_())
