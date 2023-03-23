@@ -7,8 +7,4 @@ pip install -r requirements.txt
 sh run.sh
 ```
 Video demo:
-<p align="center">
-  <video width="320" height="240" controls>
-    <source src="/home/thaivv@kaopiz.local/Downloads/Demo.mp4" type="video/mp4">
-</video>
-</p>
+
